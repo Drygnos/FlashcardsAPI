@@ -1,0 +1,23 @@
+{
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.2.3",
+    "drizzle-orm": "^0.45.0",
+    "jsonwebtoken": "^9.0.3",
+    "nodemon": "^3.1.11",
+    "zod": "^4.1.13"
+  },
+  "name": "flashcardsapi",
+  "description": "Will update later",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "FlashcardsAPI"
+  },
+  "author": "Noé BRAULT",
+  "license": "ISC"
+}
