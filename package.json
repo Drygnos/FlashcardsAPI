@@ -12,7 +12,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "dev"
+    "test": "node src/server.js"
   },
   "repository": {
     "type": "git",
