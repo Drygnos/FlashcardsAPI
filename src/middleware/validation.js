@@ -1,0 +1,42 @@
+import { ZodError, ZodType } from "zod"
+
+export const validateBody = (schema) => {
+    return (req, res, next) => {
+        if (schema instanceof ZodType){
+            try {
+                schema.parse(req.body);
+                next();
+            } catch(error){
+                if (error instanceof ZodError){
+                    res.status(400).send({
+                        error: 'validation failed',
+                        details: error.issues
+                    })
+                }
+                res.status(500).send({
+                    error: 'Internal server error'
+                })
+            }
+        }
+    }
+}
+
+export const validateParams = (schema) => {
+    return (req, res, next) => {
+        if (schema instanceof ZodType){
+            try {
+                schema.parse(req.params);
+            } catch(error){
+                if (error instanceof ZodError){
+                    res.status(400).send({
+                        error: 'invalid params',
+                        details: error.issues
+                    })
+                }
+                res.status(500).send({
+                    error: 'Internal server error'
+                })
+            }
+        }
+    }
+}
