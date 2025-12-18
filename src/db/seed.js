@@ -43,13 +43,13 @@ async function seed() {
 
         const seedCollection = [
             {
-                titre: "Histoire de France",
+                title: "Histoire de France",
                 description: "Flashcards sur l'histoire de France du Moyen Âge à nos jours.",
                 isPublic: 1,
                 idUser: user1.idUser
             },
             {
-                titre: "Biologie Cellulaire",
+                title: "Biologie Cellulaire",
                 description: "Flashcards sur la biologie cellulaire pour les étudiants en L1.",
                 isPublic: 1,
                 idUser: user2.idUser
