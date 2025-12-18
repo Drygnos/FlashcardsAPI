@@ -7,9 +7,12 @@ https://drawsql.app/teams/team-rocket-39/diagrams/projet-flashcards
 ```bash
 npm install
 ```
-**Configuration** :
+**Configuration** :  
+  
 Variables du .env : 
+```
 DB_FILE JWT_SECRET
+```
 **Lancement du projet** :
 ```bash
 npm run dev
