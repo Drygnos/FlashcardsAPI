@@ -47,12 +47,12 @@ export const createFlashcard = async (req, res) => {
     try {
         const result = await db.insert(flashcard).values(req.body).returning();
         res.status(201).json({
-            message: 'Question created successfully',
+            message: 'Flashcard created successfully',
             question: result
         });
     } catch (error) {
         res.status(500).send({
-            error: 'Failed to create question'
+            error: 'Failed to create flashcard'
         })
     }
 }
