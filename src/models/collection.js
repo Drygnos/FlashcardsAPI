@@ -1,11 +1,11 @@
 import { z } from "zod"
 
 export const createCollectionSchema = z.object({
-    title: text('title').notNull(),
-    description: text('description').notNull(),
-    isPublic: integer('is_public', { mode: 'boolean' }).notNull(),
+    title: z.string().min(3).max(255),
+    description: z.string().max(255),
+    isPublic: z.boolean(),
 })
 
 export const collectionIdSchema = z.object({
-    id: z.uuid()
+    id: z.coerce.number(),
 })

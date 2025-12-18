@@ -1,5 +1,6 @@
 import { db } from "../db/database.js";
 import { collection } from "../db/schema.js";
+import {eq} from 'drizzle-orm';
 
 export const getAllCollections = async (req, res) => {
     try {
@@ -15,7 +16,7 @@ export const getAllCollections = async (req, res) => {
 export const getCollection = async (req, res) => {
     const { id } = req.params;
     try {
-        const result = await db.select(collection).where(eq(collection.id, id)).returning();
+        const result = await db.select().from(collection).where(eq(collection.idCollection, id));
         if (!result){
             res.status(404).send({
                 error: 'collection not found'
@@ -26,19 +27,35 @@ export const getCollection = async (req, res) => {
             collection: result
         });
     } catch (error) {
-        res.status()
+        console.error(error);
+        res.status(500);
     }
 }
 
 
 export const createCollection = async (req, res) => {
     try {
-        const result = await db.insert(collection).values(req.body).returning();
+        const { title, description, isPublic, idUser } = req.body;
+        const result = await db
+            .insert(collection)
+            .values({
+                title,
+                description,
+                isPublic,
+                idUser
+            }).returning({
+                id: collection.idCollection,
+                title: collection.title,
+                description: collection.description,
+                isPublic: collection.isPublic,
+                idUser: collection.idUser
+            });
         res.status(201).json({
             message: 'collection created successfully',
             collection: result
         });
     } catch (error) {
+        console.error(error);
         res.status(500).send({
             error: 'Failed to create collection'
         })
