@@ -18,7 +18,7 @@ export const user = sqliteTable('user', {
 
 export const collection = sqliteTable('collection', {
   idCollection: integer('id_collection').primaryKey({ autoIncrement: true }),
-  titre: text('titre').notNull(),
+  title: text('title').notNull(),
   description: text('description').notNull(),
   isPublic: integer('is_public', { mode: 'boolean' }).notNull(),
   idUser: integer('id_user').notNull().references(() => user.idUser),

@@ -26,6 +26,7 @@ export const validateParams = (schema) => {
         if (schema instanceof ZodType){
             try {
                 schema.parse(req.params);
+                next();
             } catch(error){
                 if (error instanceof ZodError){
                     res.status(400).send({
