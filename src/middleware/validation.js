@@ -10,12 +10,12 @@ export const validateBody = (schema) => {
             } catch(error){
                 console.error(error);
                 if (error instanceof ZodError){
-                    res.status(400).send({
+                    return res.status(400).send({
                         error: 'validation failed',
                         details: error.issues
                     })
                 }
-                res.status(500).send({
+                return res.status(500).send({
                     error: 'Internal server error'
                 })
             }
@@ -31,12 +31,12 @@ export const validateParams = (schema) => {
                 next();
             } catch(error){
                 if (error instanceof ZodError){
-                    res.status(400).send({
+                    return res.status(400).send({
                         error: 'invalid params',
                         details: error.issues
                     })
                 }
-                res.status(500).send({
+                return res.status(500).send({
                     error: 'Internal server error'
                 })
             }

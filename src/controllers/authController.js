@@ -25,28 +25,22 @@ export const register = async (req, res) => {
                 lastName,
                 password: hashedPassword,
                 admin: 0
-
         }).returning({
-            id: user.idUser,
+            idUser: user.idUser,
             email: user.email,
             name: user.name,
             lastName: user.lastName
         })
-
         const token = jwt.sign(
-            {
-                userId: result.id
-            }, 
+            { idUser: result.idUser }, 
             process.env.JWT_SECRET,
             { expiresIn: '24h'}
         )
-
         res.status(201).json({
             message: "User created",
             user: result,
             token
         })
-
     } catch (error){
         console.error(error)
         res.status(500).json({
@@ -64,40 +58,34 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
-
         const [usr] = await db
             .select()
             .from(user)
             .where(eq(user.email, email))
             .limit(1);
-
         if (!usr) {
             return res.status(401).json({
                 error: "Email ou mot de passe incorrect"
             });
         }
-
         const passwordValid = await bcrypt.compare(password, usr.password);
         if (!passwordValid) {
             return res.status(401).json({
                 error: "Email ou mot de passe incorrect"
             });
         }
-
-        /*const token = jwt.sign(
-            {
-                userid: result.id
-            },
+        const token = jwt.sign(
+            { idUser: usr.idUser },
             process.env.JWT_SECRET,
             { expiresIn: '24h' }
-        );*/
+        );
         res.status(201).json({
             message: 'Login successfully',
             userData: {
-                id: usr.userId,
+                idUser: usr.idUser,
                 email: usr.email,
             },
-            //token
+            token
         });
     } catch (error) {
         console.error(error);
