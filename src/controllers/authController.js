@@ -84,20 +84,22 @@ export const login = async (req, res) => {
             });
         }
 
-        /*const token = jwt.sign(
+        // Générer le token
+        const token = jwt.sign(
             {
-                userid: result.id
+                userId: usr.idUser
             },
             process.env.JWT_SECRET,
             { expiresIn: '24h' }
-        );*/
+        );
+        
         res.status(201).json({
             message: 'Login successfully',
             userData: {
-                id: usr.userId,
+                id: usr.idUser,
                 email: usr.email,
             },
-            //token
+            token
         });
     } catch (error) {
         console.error(error);
