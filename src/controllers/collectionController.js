@@ -1,6 +1,7 @@
 import { db } from "../db/database.js";
-import { collection, flashcard, revision } from "../db/schema.js";
+import { collection } from "../db/schema.js";
 import {eq, or, like, and} from 'drizzle-orm';
+import { deleteFlashcardsByCollection } from './flashcardController.js';
 
 
 /**
@@ -238,23 +239,13 @@ export const deleteCollection = async (req, res) => {
                 error: 'Forbidden: You are not the owner of this collection'
             });
         }
-        // get all flashcards in the collection
-        const flashcardsInCollection = await db
-            .select({ id: flashcard.idFlashcard })
-            .from(flashcard)
-            .where(eq(flashcard.idCollection, Number(id)));
-        // delete revisions for the flashcards in the collection
-        for (const card of flashcardsInCollection) {
-            await db.delete(revision).where(eq(revision.idFlashcard, card.id));
-        }
-        // delete the flashcards in the collection
-        await db.delete(flashcard).where(eq(flashcard.idCollection, Number(id)));
+        // delete flashcards (and their revisions) for this collection
+        await deleteFlashcardsByCollection(id);
         // delete the collection
         const result = await db.delete(collection).where(eq(collection.idCollection, Number(id))).returning();
         if (!result || result.length === 0) {
             return res.status(404).send({ error: 'collection not found' });
         }
-
         res.status(200).send({
             message: `Collection ${id} deleted successfully`
         });

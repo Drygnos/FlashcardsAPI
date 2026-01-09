@@ -1,5 +1,5 @@
 import { db } from "../db/database.js";
-import { flashcard, collection} from "../db/schema.js";
+import { flashcard, collection, revision } from "../db/schema.js";
 import { eq } from "drizzle-orm";
 
 
@@ -17,6 +17,22 @@ export const getFlashcard = async (req, res) => {
         });
     }
 }
+
+
+export const deleteFlashcardsByCollection = async (idCollection) => {
+    // deletes revisions for flashcards in the collection, then the flashcards
+    const collectionId = Number(idCollection);
+    const flashcardsInCollection = await db
+        .select({ id: flashcard.idFlashcard })
+        .from(flashcard)
+        .where(eq(flashcard.idCollection, collectionId));
+
+    for (const card of flashcardsInCollection) {
+        await db.delete(revision).where(eq(revision.idFlashcard, card.id));
+    }
+
+    await db.delete(flashcard).where(eq(flashcard.idCollection, collectionId));
+};
 
 
 
