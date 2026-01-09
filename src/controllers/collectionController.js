@@ -1,5 +1,5 @@
 import { db } from "../db/database.js";
-import { collection } from "../db/schema.js";
+import { collection, flashcard, revision } from "../db/schema.js";
 import {eq, or, like, and} from 'drizzle-orm';
 
 
@@ -218,12 +218,45 @@ export const updateCollection = async (req, res) => {
 export const deleteCollection = async (req, res) => {
     const { id } = req.params;
     try {
-        const result = await db.delete(collection).where(eq(collection.idCollection, Number(id))).returning();
-        if (!result || result.length === 0){
+        // verify user is authenticated
+        const userId = req.user?.idUser;
+        if (!userId) {
+            return res.status(401).send({ error: 'Unauthorized: you need to be authenticated to delete a collection' });
+        }
+        // check if collection exists
+        const existingCollection = await db
+            .select()
+            .from(collection)
+            .where(eq(collection.idCollection, Number(id)))
+            .get();
+        if (!existingCollection) {
             return res.status(404).send({ error: 'collection not found' });
         }
+        // verify user owns the collection
+        if (existingCollection.idUser !== userId) {
+            return res.status(403).send({
+                error: 'Forbidden: You are not the owner of this collection'
+            });
+        }
+        // get all flashcards in the collection
+        const flashcardsInCollection = await db
+            .select({ id: flashcard.idFlashcard })
+            .from(flashcard)
+            .where(eq(flashcard.idCollection, Number(id)));
+        // delete revisions for the flashcards in the collection
+        for (const card of flashcardsInCollection) {
+            await db.delete(revision).where(eq(revision.idFlashcard, card.id));
+        }
+        // delete the flashcards in the collection
+        await db.delete(flashcard).where(eq(flashcard.idCollection, Number(id)));
+        // delete the collection
+        const result = await db.delete(collection).where(eq(collection.idCollection, Number(id))).returning();
+        if (!result || result.length === 0) {
+            return res.status(404).send({ error: 'collection not found' });
+        }
+
         res.status(200).send({
-            message: `collection ${id} deleted successfully`
+            message: `Collection ${id} deleted successfully`
         });
     } catch (error) {
         console.error(error);
