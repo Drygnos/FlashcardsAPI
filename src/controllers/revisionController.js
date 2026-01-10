@@ -2,7 +2,7 @@ import { db } from "../db/database.js";
 import { revision, flashcard, collection } from "../db/schema.js";
 import { eq, and, lte, sql } from "drizzle-orm";
 
-// Délais de révision en jours pour chaque niveau
+// Revision delays in days for each level
 const REVISION_DELAYS = {
   1: 1,
   2: 2,
@@ -11,21 +11,21 @@ const REVISION_DELAYS = {
   5: 16
 };
 
-// Calculer la prochaine date de révision
+// Calculate the next revision date
 const calculateNextRevisionDate = (lastDate, level) => {
   const delay = REVISION_DELAYS[level] || 16;
   const date = new Date(lastDate);
   date.setDate(date.getDate() + delay);
-  return date.toISOString().split('T')[0];
+  return date.toISOString().split('T')[0]; // YYYY-MM-DD format
 };
 
-// Récupérer les flashcards à réviser d'une collection
+// Get flashcards to review from a collection
 export const getFlashcardsToReview = async (req, res) => {
   try {
     const { idCollection } = req.params;
     const userId = req.user.idUser;
 
-    // Vérifier que la collection existe et que l'utilisateur y a accès
+    // Check if the collection exists and if the user has access
     const collectionData = await db
       .select()
       .from(collection)
@@ -33,29 +33,29 @@ export const getFlashcardsToReview = async (req, res) => {
       .limit(1);
 
     if (collectionData.length === 0) {
-      return res.status(404).json({ error: 'Collection non trouvée' });
+      return res.status(404).json({ error: 'Collection not found' });
     }
 
     const coll = collectionData[0];
 
-    // Vérifier les droits d'accès
+    // Check access rights
     if (!coll.isPublic && coll.idUser !== userId) {
-      return res.status(403).json({ error: 'Accès non autorisé à cette collection' });
+      return res.status(403).json({ error: 'Unauthorized access to this collection' });
     }
 
     const today = new Date().toISOString().split('T')[0];
 
-    // Récupérer toutes les flashcards de la collection
+    // Retrieve all flashcards from the collection
     const flashcards = await db
       .select()
       .from(flashcard)
       .where(eq(flashcard.idCollection, parseInt(idCollection)));
 
-    // Pour chaque flashcard, vérifier si elle doit être révisée
+    // For each flashcard, check if it needs to be reviewed
     const flashcardsToReview = [];
 
     for (const card of flashcards) {
-      // Chercher la révision de l'utilisateur pour cette flashcard
+      // Retrieve the user's revision for this flashcard
       const revisionData = await db
         .select()
         .from(revision)
@@ -68,7 +68,7 @@ export const getFlashcardsToReview = async (req, res) => {
         .limit(1);
 
       if (revisionData.length === 0) {
-        // Pas encore révisée, à réviser
+        // Never reviewed before, needs review
         flashcardsToReview.push({
           ...card,
           level: 0,
@@ -79,7 +79,7 @@ export const getFlashcardsToReview = async (req, res) => {
         const rev = revisionData[0];
         const nextDate = calculateNextRevisionDate(rev.lastDate, rev.level);
 
-        // Si la date de prochaine révision est passée ou aujourd'hui
+        // If the next revision date is today or overdue
         if (nextDate <= today) {
           flashcardsToReview.push({
             ...card,
@@ -94,18 +94,18 @@ export const getFlashcardsToReview = async (req, res) => {
     res.status(200).json(flashcardsToReview);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Erreur lors de la récupération des flashcards à réviser' });
+    res.status(500).json({ error: 'Error while retrieving flashcards to review' });
   }
 };
 
-// Réviser une flashcard
+// Review a flashcard
 export const reviewFlashcard = async (req, res) => {
   try {
     const { idFlashcard } = req.params;
     const userId = req.user.idUser;
     const today = new Date().toISOString().split('T')[0];
 
-    // Vérifier que la flashcard existe
+    // Check if the flashcard exists
     const flashcardData = await db
       .select()
       .from(flashcard)
@@ -113,12 +113,12 @@ export const reviewFlashcard = async (req, res) => {
       .limit(1);
 
     if (flashcardData.length === 0) {
-      return res.status(404).json({ error: 'Flashcard non trouvée' });
+      return res.status(404).json({ error: 'Flashcard not found' });
     }
 
     const card = flashcardData[0];
 
-    // Vérifier que l'utilisateur a accès à cette flashcard via sa collection
+    // Check if the user has access to this flashcard through its collection
     const collectionData = await db
       .select()
       .from(collection)
@@ -126,17 +126,17 @@ export const reviewFlashcard = async (req, res) => {
       .limit(1);
 
     if (collectionData.length === 0) {
-      return res.status(404).json({ error: 'Collection non trouvée' });
+      return res.status(404).json({ error: 'Collection not found' });
     }
 
     const coll = collectionData[0];
 
-    // Vérifier les droits d'accès
+    // Check access rights
     if (!coll.isPublic && coll.idUser !== userId) {
-      return res.status(403).json({ error: 'Accès non autorisé à cette flashcard' });
+      return res.status(403).json({ error: 'Unauthorized access to this flashcard' });
     }
 
-    // Récupérer la révision actuelle de l'utilisateur
+    // Retrieve the user's current revision
     const revisionData = await db
       .select()
       .from(revision)
@@ -149,9 +149,9 @@ export const reviewFlashcard = async (req, res) => {
       .limit(1);
 
     let newLevel;
-    
+
     if (revisionData.length === 0) {
-      // Première révision : niveau 1
+      // First review: level 1
       newLevel = 1;
       await db.insert(revision).values({
         idUser: userId,
@@ -160,10 +160,10 @@ export const reviewFlashcard = async (req, res) => {
         level: newLevel
       });
     } else {
-      // Monter d'un niveau (maximum 5)
+      // Increase level by one (maximum level is 5)
       const currentLevel = revisionData[0].level;
       newLevel = Math.min(currentLevel + 1, 5);
-      
+
       await db
         .update(revision)
         .set({
@@ -181,13 +181,13 @@ export const reviewFlashcard = async (req, res) => {
     const nextRevisionDate = calculateNextRevisionDate(today, newLevel);
 
     res.status(200).json({
-      message: 'Révision enregistrée avec succès',
+      message: 'Revision successfully recorded',
       level: newLevel,
       lastDate: today,
       nextRevisionDate: nextRevisionDate
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Erreur lors de l\'enregistrement de la révision' });
+    res.status(500).json({ error: 'Error while recording the revision' });
   }
 };

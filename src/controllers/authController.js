@@ -84,7 +84,6 @@ export const login = async (req, res) => {
             });
         }
 
-        // Générer le token
         const token = jwt.sign(
             {
                 userId: usr.idUser
