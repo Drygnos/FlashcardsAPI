@@ -1,11 +1,11 @@
 import express from 'express';
 import { getFlashcardsToReview, reviewFlashcard } from '../controllers/revisionController.js';
-import { authMiddleware } from '../middleware/authMiddleware.js';
+import authenticate, { optionalAuthenticate } from '../middleware/auth.js';
 
 const router = express.Router();
 
 
-router.get('/collection/:idCollection',authMiddleware, getFlashcardsToReview);
-router.post('/flashcard/:idFlashcard',authMiddleware, reviewFlashcard);
+router.get('/collection/:idCollection',authenticate, getFlashcardsToReview);
+router.post('/flashcard/:idFlashcard',authenticate, reviewFlashcard);
 
 export default router;

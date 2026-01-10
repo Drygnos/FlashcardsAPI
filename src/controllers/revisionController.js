@@ -13,7 +13,7 @@ const REVISION_DELAYS = {
 
 // Calculate the next revision date
 const calculateNextRevisionDate = (lastDate, level) => {
-  const delay = REVISION_DELAYS[level] || 16;
+  const delay = REVISION_DELAYS[level] || 1;
   const date = new Date(lastDate);
   date.setDate(date.getDate() + delay);
   return date.toISOString().split('T')[0]; // YYYY-MM-DD format
