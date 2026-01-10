@@ -24,7 +24,8 @@ export const register = async (req, res) => {
                 name,
                 lastName,
                 password: hashedPassword,
-                admin: 0
+                admin: 0,
+                createdAt: new Date().toISOString()
         }).returning({
             idUser: user.idUser,
             email: user.email,

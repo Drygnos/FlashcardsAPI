@@ -13,6 +13,7 @@ export const user = sqliteTable('user', {
   lastName: text('last_name').notNull(),
   password: text('password').notNull(),
   admin: integer('admin', { mode: 'boolean' }).notNull(),
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
 });
 
 

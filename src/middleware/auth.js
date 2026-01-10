@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 export default function authenticate(req, res, next) {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ error: 'Unauthorized' });
+        return res.status(401).json({ error: 'Unauthorized - Authentication token required' });
     }
     const token = authHeader.split(' ')[1];
     try {
@@ -14,7 +14,6 @@ export default function authenticate(req, res, next) {
         return res.status(401).json({ error: 'Invalid token' });
     }
 }
-
 
 export function optionalAuthenticate(req, res, next) {
     const authHeader = req.headers.authorization;

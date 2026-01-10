@@ -1,5 +1,5 @@
 import express from 'express';
-import userRoutes from './router/userRouter.js';
+import adminRoutes from './router/adminRouter.js';
 import logger from './middleware/logger.js';
 import authRoutes from './router/authRouter.js';
 import flashcardRoutes from './router/flashcardRouter.js';
@@ -14,10 +14,9 @@ app.use(logger);
 app.use(express.json())
 
 app.use('/auth', authRoutes);
-app.use('/user', userRoutes);
-app.use('/flashcard', flashcardRoutes);
+app.use('/admin', adminRoutes);
 app.use('/collection', collectionRoutes);
-
+app.use('/flashcard', flashcardRoutes);
 app.use('/revision', revisionRoutes);
 
 app.listen(PORT, ()=>{

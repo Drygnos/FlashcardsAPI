@@ -14,8 +14,10 @@ async function seed() {
 
         
 
-        const hashedPassword1 = await bcrypt.hash('password', 10)
-		const hashedPassword2 = await bcrypt.hash('1234', 12)
+        const hashedPassword1 = await bcrypt.hash('password', 10);
+		const hashedPassword2 = await bcrypt.hash('1234', 12);
+        const hashedPasswordAdmin = await bcrypt.hash('adminpass', 12);
+
 
 
         const seedUser = [
@@ -32,11 +34,18 @@ async function seed() {
                 lastName: 'Frein',
 				password: hashedPassword2,
                 admin: 0
-			}
+			},
+            {
+                email: "admin@admin.com",
+                name: "Admin",
+                lastName: "Admin",
+                password: hashedPasswordAdmin,
+                admin: 1
+            }
 		];
 
 
-        const [user1, user2] = await db.insert(user)
+        const [user1, user2, admin] = await db.insert(user)
             .values(seedUser)
             .returning();
 
