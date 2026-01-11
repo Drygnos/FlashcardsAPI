@@ -11,7 +11,8 @@ npm install
   
 Variables du .env : 
 ```
-DB_FILE JWT_SECRET
+DB_FILE
+JWT_SECRET
 ```
 **Lancement du projet** :
 ```bash
@@ -30,3 +31,5 @@ npm run db:seed
 npm run db:studio
 ```
 **Routes** :
+API_DOCUMENTATION.MD
+
