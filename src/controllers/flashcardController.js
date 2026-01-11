@@ -192,3 +192,72 @@ export const getFlashcardByCollection = async (req, res) => {
         res.status(500).json({ error: "Failed to fetch flashcards" });
     }
 };
+
+
+/**
+ * Update a flashcard
+ * Only the owner of the collection can update it
+ *
+ * @param {request} req
+ * @param {response} res
+ */
+export const updateFlashcard = async (req, res) => {
+    const { id } = req.params;
+    const userId = req.user.idUser;
+    const { recto, verso, rectoUrl, versoUrl } = req.body;
+
+    try {
+        // Verify that the flashcard exists
+        const flashcardData = await db
+            .select()
+            .from(flashcard)
+            .where(eq(flashcard.idFlashcard, Number(id)));
+
+        if (flashcardData.length === 0) {
+            return res.status(404).json({ error: "Flashcard not found" });
+        }
+
+        const card = flashcardData[0];
+
+        // Verify that the user is the owner of the collection to which the flashcard belongs
+        const collectionData = await db
+            .select()
+            .from(collection)
+            .where(eq(collection.idCollection, card.idCollection));
+
+        if (collectionData.length === 0) {
+            return res.status(404).json({ error: "Collection not found" });
+        }
+
+        if (collectionData[0].idUser !== userId) {
+            return res.status(403).json({ error: "Access denied. Only the collection owner can update flashcards" });
+        }
+
+        // Build the update data object
+        const updateData = {};
+        if (recto !== undefined) updateData.recto = recto;
+        if (verso !== undefined) updateData.verso = verso;
+        if (rectoUrl !== undefined) updateData.rectoUrl = rectoUrl;
+        if (versoUrl !== undefined) updateData.versoUrl = versoUrl;
+
+        // Verify that there is at least one field to update
+        if (Object.keys(updateData).length === 0) {
+            return res.status(400).json({ error: "No fields to update" });
+        }
+
+        // Update the flashcard
+        const result = await db
+            .update(flashcard)
+            .set(updateData)
+            .where(eq(flashcard.idFlashcard, Number(id)))
+            .returning();
+
+        res.json({
+            message: "Flashcard updated successfully",
+            flashcard: result[0]
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to update flashcard" });
+    }
+};
