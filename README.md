@@ -31,5 +31,5 @@ npm run db:seed
 npm run db:studio
 ```
 **Routes** :
-API_DOCUMENTATION.MD
+API_DOCUMENTATION.md
 
